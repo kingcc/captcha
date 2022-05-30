@@ -1,4 +1,34 @@
 # ocr_api_server
+2022-5-30 更新
+
+1、新增了简单数字加减乘除验证码计算
+
+```
+POST /ocr/b64/json HTTP/1.1
+Host: 127.0.0.1:9898
+Authorization:Basic f0ngauth
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:97.0) Gecko/20100101 Firefox/97.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 8332
+
+{"typeid":"2","image":"<@BASE64><@IMG_RAW></@IMG_RAW></@BASE64>"}
+```
+
+typeid 定义：
+
+1、正常识别
+
+2、数学运算
+
+
+
+## 原文档
+
 使用ddddocr的最简api搭建项目，支持docker
 
 **建议python版本3.7-3.9 64位**
