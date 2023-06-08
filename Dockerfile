@@ -9,6 +9,8 @@ RUN cd /app \
     && pip3 install --no-cache-dir -r requirements.txt \
     && apt-get --allow-releaseinfo-change update \
     && apt-get install -y libgl1-mesa-glx libglib2.0-0 \
+    && apt-get clean autoclean \
+    && apt-get autoremove --yes \
     && rm -rf /tmp/* && rm -rf /root/.cache/* \
     && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
