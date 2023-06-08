@@ -52,5 +52,5 @@ jobs:
                   chmod +x ./dist_linux/docker-slim
             - name: Minify
               run: |
-                  ./dist_linux/docker-slim build --tag ${{ env.IMAGE_NAME }}:slim --dockerfile Dockerfile . && \
+                  ./dist_linux/docker-slim build --tag ${{ env.IMAGE_NAME }}:slim ${{ env.IMAGE_NAME }} && \
                   docker push ${{ env.IMAGE_NAME }}:slim
