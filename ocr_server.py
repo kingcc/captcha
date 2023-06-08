@@ -2,7 +2,7 @@
 import argparse
 import base64
 import json
-
+import re
 import ddddocr
 from flask import Flask, request
 
@@ -40,6 +40,58 @@ class Server(object):
         else:
             print("目标检测模块未开启，如需要使用，请使用参数  --det开启")
 
+    def division(self, value):
+        """计算除法"""
+        exp = value.split('/')
+        vul1 = int(re.findall("\d+",exp[0])[0]) # 提取数字
+        vul2 = int(re.findall("\d+",exp[1])[0])
+        # print(vul1)
+        # print(vul2)        
+        return str(vul1/vul2)
+
+    def multiplication(self, value):
+        """计算乘法"""
+        exp = value.split(r'*')
+        vul1 = int(re.findall("\d+",exp[0])[0]) # 提取数字
+        vul2 = int(re.findall("\d+",exp[1])[0])
+        # print(vul1)
+        # print(vul2)        
+        return str(vul1*vul2)
+
+    def addition(self, value):
+        """计算加法"""
+        exp = value.split('+')
+        vul1 = int(re.findall("\d+",exp[0])[0]) # 提取数字
+        vul2 = int(re.findall("\d+",exp[1])[0])
+        # print(vul1)
+        # print(vul2)
+        return str(vul1+vul2)
+
+    def subtraction(self, value):
+        """计算减法"""
+        exp = value.split('-')
+        vul1 = int(re.findall("\d+",exp[0])[0]) # 提取数字
+        vul2 = int(re.findall("\d+",exp[1])[0])
+        # print(vul1)
+        # print(vul2)
+        return str(vul1-vul2)
+
+    def caculation(self, img:bytes):
+        if self.ocr_option:
+            res = self.ocr.classification(img)
+            # print(res)
+            if '+' in res:
+               res = self.addition(res)
+            if '-' in res:
+               res = self.subtraction(res)
+            if 'x'in res or 'X' in res:
+               res = self.multiplication(res.replace('x', '*').replace('X', '*'))
+            if' /' in res:
+               res = self.division(res)
+            return res
+        else:
+            raise Exception("ocr模块未开启")
+
     def classification(self, img: bytes):
         if self.ocr_option:
             return self.ocr.classification(img)
@@ -66,15 +118,22 @@ server = Server(ocr=args.ocr, det=args.det, old=args.old)
 
 def get_img(request, img_type='file', img_name='image'):
     if img_type == 'b64':
-        img = base64.b64decode(request.get_data()) # 
         try: # json str of multiple images
-            dic = json.loads(img)
+            dic = json.loads(request.get_data())
             img = base64.b64decode(dic.get(img_name).encode())
+            typeid = dic.get("typeid")
+
         except Exception as e: # just base64 of single image
             pass
     else:
-        img = request.files.get(img_name).read()
-    return img
+        try: # json str of multiple images
+            dic = json.loads(request.get_data())
+            img = dic.get(img_name).encode()
+            typeid = dic.get("typeid")
+        except Exception as e: # just base64 of single image
+            pass
+        
+    return typeid,img
 
 
 def set_ret(result, ret_type='text'):
@@ -95,9 +154,15 @@ def set_ret(result, ret_type='text'):
 @app.route('/<opt>/<img_type>/<ret_type>', methods=['POST'])
 def ocr(opt, img_type='file', ret_type='text'):
     try:
-        img = get_img(request, img_type)
+        res = get_img(request, img_type)
+        typeid = res[0]
+        img = res[1]
+        result = ''
         if opt == 'ocr':
-            result = server.classification(img)
+            if typeid == '1': # 普通验证码
+                result = server.classification(img)
+            if typeid == "2": # 计算型验证码
+                result = server.caculation(img)
         elif opt == 'det':
             result = server.detection(img)
         else:
