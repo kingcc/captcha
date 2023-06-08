@@ -4,12 +4,13 @@ RUN mkdir /app
 
 COPY ./*.txt ./*.py ./*.sh ./*.onnx /app/
 
-
 RUN cd /app \
-    && python3 -m pip install --upgrade pip\
-    && pip3 install --no-cache-dir -r requirements.txt\
+    && python3 -m pip install --upgrade pip \
+    && pip3 install --no-cache-dir -r requirements.txt \
     && rm -rf /tmp/* && rm -rf /root/.cache/* \
-    && apt-get --allow-releaseinfo-change update && apt install libgl1-mesa-glx libglib2.0-0 -y
+    && apt-get --allow-releaseinfo-change update \
+    && apt-get install -y libgl1-mesa-glx libglib2.0-0 \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/
 
 WORKDIR /app
 
